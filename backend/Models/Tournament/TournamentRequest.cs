@@ -28,12 +28,24 @@ namespace backend.Models.Tournament
             }
         }
 
-        public void Add(Tournament tournament)
+        public bool Add(Tournament tournament)
         {
-            tournamentList.Add(tournament);
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                string str = guid.ToString();
+                tournament.TournamentId = str;
+                tournament.Matches = new List<string>();
+                tournamentList.Add(tournament);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public String Remove(int tournamentId)
+        public bool Remove(string tournamentId)
         {
             for (int i = 0; i < tournamentList.Count; i++)
             {
@@ -41,10 +53,10 @@ namespace backend.Models.Tournament
                 if (temp.TournamentId.Equals(tournamentId))
                 {
                     tournamentList.RemoveAt(i);
-                    return "Delete successful";
+                    return true;
                 }
             }
-            return "Delete unsuccessful";
+            return false;
         }
 
         public List<Tournament> getAllTournaments()
@@ -52,7 +64,7 @@ namespace backend.Models.Tournament
             return tournamentList;
         }
 
-        public String UpdateTournament(Tournament tournament)
+        public bool UpdateTournament(Tournament tournament)
         {
             for (int i = 0; i < tournamentList.Count; i++)
             {
@@ -60,13 +72,13 @@ namespace backend.Models.Tournament
                 if (temp.TournamentId.Equals(tournament.TournamentId))
                 {
                     tournamentList[i] = tournament; //update user
-                    return "Update successful";
+                    return true;
                 }
             }
-            return "Update unsuccessful";
+            return false;
         }
 
-        public Tournament getTournamentById(int id)
+        public Tournament getTournamentById(string id)
         {
             for (int i = 0; i < tournamentList.Count; i++)
             {
@@ -77,6 +89,17 @@ namespace backend.Models.Tournament
                 }
             }
             return null;
+        }
+
+        public bool addMatch(string id, string tournamentId)
+        {
+            Tournament myTournament = getTournamentById(tournamentId);
+            if (myTournament != null)
+            {
+                myTournament.Matches.Add(id);
+                return true;
+            }
+            return false;
         }
     }
 }

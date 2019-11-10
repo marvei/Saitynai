@@ -15,8 +15,8 @@ namespace backend.Models.Team
             set { name = value; }
         }
 
-        int teamId;
-        public int TeamId
+        string teamId;
+        public string TeamId
         {
             get { return teamId; }
             set { teamId = value; }

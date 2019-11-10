@@ -23,8 +23,8 @@ namespace backend.Models
             set { age = value; }
         }
 
-        int userId;
-        public int UserId
+        string userId;
+        public string UserId
         {
             get { return userId;  }
             set { userId = value; }

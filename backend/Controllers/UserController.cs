@@ -14,50 +14,80 @@ namespace backend.Controllers
         //[Route("GetUsers")]
         [HttpGet]
         [Route("api/user")]
-        public List<User> getUsers()
+        public IHttpActionResult getUsers()
         {
-            return UserRequest.getInstance().getAllUsers();
+            List<User> availableUsers = UserRequest.getInstance().getAllUsers();
+            if (availableUsers.Any())
+            {
+                return Ok(availableUsers);
+            }
+            return NotFound();
         }
 
         //[Route("GetUserById/{userId}")]
         [HttpGet]
         [Route("api/user/{userId}")]
-        public User getUserById(int userId)
+        public IHttpActionResult getUserById(string userId)
         {
-            return UserRequest.getInstance().getUserById(userId);
+            User requestedUser = UserRequest.getInstance().getUserById(userId);
+            if (requestedUser != null)
+            {
+                return Ok(requestedUser);
+            }
+            return NotFound();
         }
 
         //[Route("CreateUser")]
         [HttpPost]
         [Route("api/user")]
-        public UserReply registerUser(User user)
+        public IHttpActionResult registerUser(User user)
         {
-            Console.WriteLine("In registerUser");
-            UserReply userRep = new UserReply();
-            UserRequest.getInstance().Add(user);
-            userRep.Name = user.Name;
-            userRep.Age = user.Age;
-            userRep.UserId = user.UserId;
-            userRep.UserStatus = "Successful";
 
-            return userRep;
+            if (UserRequest.getInstance().Add(user))
+            {
+                return Ok();
+            }
+            return BadRequest();
+
+            //Console.WriteLine("In registerUser");
+            //UserReply userRep = new UserReply();
+            //UserRequest.getInstance().Add(user);
+            //userRep.Name = user.Name;
+            //userRep.Age = user.Age;
+            //userRep.UserId = user.UserId;
+            //userRep.UserStatus = "Successful";
+
+            //return teamRep;
+
         }
 
         //[Route("UpdateUser")]
         [HttpPut]
         [Route("api/user")]
-        public String putUser(User user)
+        public IHttpActionResult putUser(User user)
         {
-            return UserRequest.getInstance().UpdateUser(user);
+            if (UserRequest.getInstance().UpdateUser(user))
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
 
 
         //[Route("RemoveUser/{userId}")]
         [HttpDelete]
         [Route("api/user/{userId}")]
-        public String deleteUser(int userId)
+        public IHttpActionResult deleteUser(string userId)
         {
-            return UserRequest.getInstance().Remove(userId);
+            if (UserRequest.getInstance().getUserById(userId) == null)
+            {
+                return NotFound();
+            }
+            if (UserRequest.getInstance().Remove(userId))
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 }

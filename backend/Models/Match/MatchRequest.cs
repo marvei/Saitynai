@@ -28,12 +28,24 @@ namespace backend.Models.Match
             }
         }
 
-        public void Add(Match match)
+        public bool Add(Match match)
         {
-            matchList.Add(match);
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                string str = guid.ToString();
+                match.MatchId = str;
+                match.Teams = new List<string>();
+                matchList.Add(match);
+                return true;
+            }
+            catch (Exception ex) 
+            {
+                return false;
+            }
         }
 
-        public String Remove(int matchId)
+        public bool Remove(string matchId)
         {
             for (int i = 0; i < matchList.Count; i++)
             {
@@ -41,10 +53,10 @@ namespace backend.Models.Match
                 if (temp.MatchId.Equals(matchId))
                 {
                     matchList.RemoveAt(i);
-                    return "Delete successful";
+                    return true;
                 }
             }
-            return "Delete unsuccessful";
+            return false;
         }
 
         public List<Match> getAllMatches()
@@ -52,7 +64,7 @@ namespace backend.Models.Match
             return matchList;
         }
 
-        public String UpdateMatch(Match match)
+        public bool UpdateMatch(Match match)
         {
             for (int i = 0; i < matchList.Count; i++)
             {
@@ -60,13 +72,13 @@ namespace backend.Models.Match
                 if (temp.MatchId.Equals(match.MatchId))
                 {
                     matchList[i] = match; //update user
-                    return "Update successful";
+                    return true;
                 }
             }
-            return "Update unsuccessful";
+            return false;
         }
 
-        public Match getMatchById(int id)
+        public Match getMatchById(string id)
         {
             for (int i = 0; i < matchList.Count; i++)
             {
@@ -77,6 +89,17 @@ namespace backend.Models.Match
                 }
             }
             return null;
+        }
+
+        public bool addTeam(string id, string matchId)
+        {
+            Match myMatch = getMatchById(matchId);
+            if (myMatch != null)
+            {
+                myMatch.Teams.Add(id);
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using backend.Models.Match;
+using backend.Models.Team;
 
 namespace backend.Controllers
 {
@@ -12,45 +13,93 @@ namespace backend.Controllers
     {
         [HttpGet]
         [Route("api/match")]
-        public List<Match> getUsers()
+        public IHttpActionResult getUsers()
         {
-            return MatchRequest.getInstance().getAllMatches();
+            List<Match> availableMatches = MatchRequest.getInstance().getAllMatches();
+            if (availableMatches.Any())
+            {
+                return Ok(availableMatches);
+            }
+            return NotFound();
         }
 
         [HttpGet]
         [Route("api/match/{matchId}")]
-        public Match getMatchById(int matchId)
+        public IHttpActionResult getMatchById(string matchId)
         {
-            return MatchRequest.getInstance().getMatchById(matchId);
+            Match currentMatch = MatchRequest.getInstance().getMatchById(matchId);
+            if (currentMatch != null)
+            {
+                return Ok();
+            }
+            return NotFound();
         }
 
         [HttpPost]
         [Route("api/match")]
-        public MatchReply registerUser(Match match)
+        public IHttpActionResult registerUser(Match match)
         {
-            Console.WriteLine("In registerUser");
-            MatchReply matchRep = new MatchReply();
-            MatchRequest.getInstance().Add(match);
-            matchRep.Name = match.Name;
-            matchRep.Date = match.Date;
-            matchRep.MatchId = match.MatchId;
-            matchRep.MatchStatus = "Successful";
 
-            return matchRep;
+            if (MatchRequest.getInstance().Add(match))
+            {
+                return Ok();
+            }
+            return BadRequest();
+
+            //Console.WriteLine("In registerUser");
+            //MatchReply matchRep = new MatchReply();
+            //MatchRequest.getInstance().Add(match);
+            //matchRep.Name = match.Name;
+            //matchRep.Date = match.Date;
+            //matchRep.MatchId = match.MatchId;
+            //matchRep.MatchStatus = "Successful";
+
+            //return matchRep;
         }
 
         [HttpPut]
         [Route("api/match")]
-        public String putMatch(Match match)
+        public IHttpActionResult putMatch(Match match)
         {
-            return MatchRequest.getInstance().UpdateMatch(match);
+            if (MatchRequest.getInstance().UpdateMatch(match))
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
 
         [HttpDelete]
         [Route("api/match/{matchId}")]
-        public String deleteUser(int matchId)
+        public IHttpActionResult deleteUser(string matchId)
         {
-            return MatchRequest.getInstance().Remove(matchId);
+            if (MatchRequest.getInstance().getMatchById(matchId) == null)
+            {
+                return NotFound();
+            }
+            if (MatchRequest.getInstance().Remove(matchId))
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        [HttpPut]
+        [Route("api/match/{matchId}/{teamId}")]
+        public IHttpActionResult addTeamToMatch(string matchId, string teamId)
+        {
+            if (TeamRequest.getInstance().getTeamById(teamId) == null)
+            {
+                return NotFound();
+            }
+            if (MatchRequest.getInstance().getMatchById(matchId) == null)
+            {
+                return NotFound();
+            }
+            if (MatchRequest.getInstance().addTeam(teamId, matchId))
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 }

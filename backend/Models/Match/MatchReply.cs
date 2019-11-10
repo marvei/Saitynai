@@ -23,9 +23,9 @@ namespace backend.Models.Match
             set { date = value; }
         }
 
-        int matchId;
+        string matchId;
 
-        public int MatchId
+        public string MatchId
         {
             get { return matchId; }
             set { matchId = value; }

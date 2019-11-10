@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using backend.Models.Tournament;
+using backend.Models.Match;
 
 namespace backend.Controllers
 {
@@ -12,43 +13,90 @@ namespace backend.Controllers
     {
         [HttpGet]
         [Route("api/tournament")]
-        public List<Tournament> getTournaments()
+        public IHttpActionResult getTournaments()
         {
-            return TournamentRequest.getInstance().getAllTournaments();
+            List<Tournament> availableTournaments = TournamentRequest.getInstance().getAllTournaments();
+            if (availableTournaments.Any())
+            {
+                return Ok(availableTournaments);
+            }
+            return NotFound();
         }
 
         [HttpGet]
         [Route("api/tournament/{tournamentId}")]
-        public Tournament getTournamentById(int tournamentId)
-        {            
-            return TournamentRequest.getInstance().getTournamentById(tournamentId);
+        public IHttpActionResult getTournamentById(string tournamentId)
+        {
+            Tournament currentTournament = TournamentRequest.getInstance().getTournamentById(tournamentId);
+            if (currentTournament != null)
+            {
+                return Ok(currentTournament);
+            }
+            return NotFound();
         }
 
         [HttpPost]
         [Route("api/tournament")]
-        public TournamentReply registerTournament(Tournament tournament)
+        public IHttpActionResult registerTournament(Tournament tournament)
         {
-            TournamentReply tournamentRep = new TournamentReply();
-            TournamentRequest.getInstance().Add(tournament);
-            tournamentRep.Name = tournament.Name;
-            tournamentRep.TournamentId = tournament.TournamentId;
-            tournamentRep.TournamentStatus = "Successful";
+            if (TournamentRequest.getInstance().Add(tournament))
+            {
+                return Ok();
+            }
+            return BadRequest();
 
-            return tournamentRep;
+            //TournamentReply tournamentRep = new TournamentReply();
+            //TournamentRequest.getInstance().Add(tournament);
+            //tournamentRep.Name = tournament.Name;
+            //tournamentRep.TournamentId = tournament.TournamentId;
+            //tournamentRep.TournamentStatus = "Successful";
+
+            //return tournamentRep;
         }
 
         [HttpPut]
         [Route("api/tournament")]
-        public String putTournament(Tournament tournament)
+        public IHttpActionResult putTournament(Tournament tournament)
         {
-            return TournamentRequest.getInstance().UpdateTournament(tournament);
+            if (TournamentRequest.getInstance().UpdateTournament(tournament))
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
 
         [HttpDelete]
         [Route("api/tournament/{tournamentId}")]
-        public String deleteTournament(int tournamentId)
+        public IHttpActionResult deleteTournament(string tournamentId)
         {
-            return TournamentRequest.getInstance().Remove(tournamentId);
+            if (TournamentRequest.getInstance().getTournamentById(tournamentId) == null)
+            {
+                return NotFound();
+            }
+            if (TournamentRequest.getInstance().Remove(tournamentId))
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        [HttpPut]
+        [Route("api/tournament/{tournamentId}/{matchId}")]
+        public IHttpActionResult addMatchToTournament(string tournamentId, string matchId)
+        {
+            if (MatchRequest.getInstance().getMatchById(matchId) == null)
+            {
+                return NotFound();
+            }
+            if (TournamentRequest.getInstance().getTournamentById(tournamentId) == null)
+            {
+                return NotFound();
+            }
+            if (TournamentRequest.getInstance().addMatch(matchId, tournamentId))
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 }

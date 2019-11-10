@@ -79,3 +79,11 @@ C:\Users\Martynas\source\repos\backend\backend\obj\Debug\backend.csprojAssemblyR
 C:\Users\Martynas\source\repos\backend\backend\obj\Debug\backend.csproj.CopyComplete
 C:\Users\Martynas\source\repos\backend\backend\obj\Debug\backend.dll
 C:\Users\Martynas\source\repos\backend\backend\obj\Debug\backend.pdb
+C:\Users\Martynas\source\repos\backend\backend\bin\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\Martynas\source\repos\backend\backend\bin\Microsoft.IdentityModel.Logging.dll
+C:\Users\Martynas\source\repos\backend\backend\bin\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Martynas\source\repos\backend\backend\bin\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Martynas\source\repos\backend\backend\bin\Microsoft.IdentityModel.JsonWebTokens.xml
+C:\Users\Martynas\source\repos\backend\backend\bin\Microsoft.IdentityModel.Logging.xml
+C:\Users\Martynas\source\repos\backend\backend\bin\Microsoft.IdentityModel.Tokens.xml
+C:\Users\Martynas\source\repos\backend\backend\bin\System.IdentityModel.Tokens.Jwt.xml

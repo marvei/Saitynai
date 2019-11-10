@@ -15,12 +15,30 @@ namespace backend.Models.Tournament
             set { name = value; }
         }
 
-        int tournamentId;
+        string tournamentId;
 
-        public int TournamentId
+        public string TournamentId
         {
             get { return tournamentId; }
             set { tournamentId = value; }
+        }
+
+        List<string> matches;
+
+        public List<string> Matches
+        {
+            get { return matches; }
+            set
+            {
+                if (matches == null)
+                {
+                    matches = new List<string>();
+                }
+                if (value.Any())
+                {
+                    matches.Add(value.First());
+                }
+            }
         }
     }
 }

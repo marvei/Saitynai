@@ -15,8 +15,8 @@ namespace backend.Models.Tournament
             set { name = value; }
         }
 
-        int tournamentId;
-        public int TournamentId
+        string tournamentId;
+        public string TournamentId
         {
             get { return tournamentId; }
             set { tournamentId = value; }

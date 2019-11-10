@@ -28,12 +28,32 @@ namespace backend.Models.Team
             }
         }
 
-        public void Add(Team team)
+        //public void Add(Team team)
+        //{
+        //    Guid guid = Guid.NewGuid();
+        //    string str = guid.ToString();
+        //    team.TeamId = str;
+        //    teamList.Add(team);
+        //}
+
+        public bool Add(Team team)
         {
-            teamList.Add(team);
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                string str = guid.ToString();
+                team.TeamId = str;
+                team.Users = new List<string>();
+                teamList.Add(team);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public String Remove(int teamId)
+        public bool Remove(string teamId)
         {
             for (int i = 0; i < teamList.Count; i++)
             {
@@ -41,10 +61,10 @@ namespace backend.Models.Team
                 if (temp.TeamId.Equals(teamId))
                 {
                     teamList.RemoveAt(i);
-                    return "Delete successful";
+                    return true;
                 }
             }
-            return "Delete unsuccessful";
+            return false;
         }
 
         public List<Team> getAllTeams()
@@ -52,7 +72,7 @@ namespace backend.Models.Team
             return teamList;
         }
 
-        public String UpdateTeam(Team team)
+        public bool UpdateTeam(Team team)
         {
             for (int i = 0; i < teamList.Count; i++)
             {
@@ -60,13 +80,13 @@ namespace backend.Models.Team
                 if (temp.TeamId.Equals(team.TeamId))
                 {
                     teamList[i] = team; //update user
-                    return "Update successful";
+                    return true;
                 }
             }
-            return "Update unsuccessful";
+            return false;
         }
 
-        public Team getTeamById(int id)
+        public Team getTeamById(string id)
         {
             for (int i = 0; i < teamList.Count; i++)
             {
@@ -77,6 +97,17 @@ namespace backend.Models.Team
                 }
             }
             return null;
+        }
+
+        public bool addUser(string id, string teamId)
+        {
+            Team myTeam = getTeamById(teamId);
+            if (myTeam != null)
+            {
+                myTeam.Users.Add(id);
+                return true;
+            }
+            return false;
         }
     }
 }

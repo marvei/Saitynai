@@ -28,12 +28,24 @@ namespace backend.Models
             }
         }
 
-        public void Add(User user)
+        public bool Add(User user)
         {
-            userList.Add(user);
+            try
+            {
+                Guid guid = Guid.NewGuid();
+                string str = guid.ToString();
+                user.UserId = str;
+                user.Password = SecurePasswordHasher.Hash(user.Password);
+                userList.Add(user);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public String Remove(int userId)
+        public bool Remove(string userId)
         {
             for (int i = 0; i < userList.Count; i++)
             {
@@ -41,10 +53,10 @@ namespace backend.Models
                 if (temp.UserId.Equals(userId))
                 {
                     userList.RemoveAt(i);
-                    return "Delete successful";
+                    return true;
                 }
             }
-            return "Delete unsuccessful";
+            return false;
         }
 
         public List<User> getAllUsers()
@@ -52,7 +64,7 @@ namespace backend.Models
             return userList;
         }
 
-        public String UpdateUser(User user)
+        public bool UpdateUser(User user)
         {
             for (int i = 0; i < userList.Count; i++)
             {
@@ -60,18 +72,31 @@ namespace backend.Models
                 if (temp.UserId.Equals(user.UserId))
                 {
                     userList[i] = user; //update user
-                    return "Update successful";
+                    return true;
                 }
             }
-            return "Update unsuccessful";
+            return false;
         }
 
-        public User getUserById(int id)
+        public User getUserById(string id)
         {
             for (int i = 0; i < userList.Count; i++)
             {
                 User temp = userList.ElementAt(i);
                 if (temp.UserId.Equals(id))
+                {
+                    return temp;
+                }
+            }
+            return null;
+        }
+
+        public User getUserByName(string name)
+        {
+            for (int i = 0; i < userList.Count; i++)
+            {
+                User temp = userList.ElementAt(i);
+                if (temp.Name.Equals(name))
                 {
                     return temp;
                 }

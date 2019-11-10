@@ -15,12 +15,31 @@ namespace backend.Models.Team
             set { name = value; }
         }
 
-        int teamId;
+        string teamId;
 
-        public int TeamId
+        public string TeamId
         {
             get { return teamId; }
             set { teamId = value; }
+        }
+
+        List<string> users;
+
+        public List<string> Users
+        {
+            get { return users; }
+            set
+            {
+                if (users == null)
+                {
+                    users = new List<string>();
+                }
+                if (value.Any())
+                {
+                    users.Add(value.First());
+                }
+                
+            }
         }
     }
 }

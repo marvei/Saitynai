@@ -23,9 +23,17 @@ namespace backend.Models
             set { age = value; }
         }
 
-        int userId;
+        string password;
 
-        public int UserId
+        public string Password
+        {
+            get { return password; }
+            set { password = value; }
+        }
+
+        string userId;
+
+        public string UserId
         {
             get { return userId; }
             set { userId = value; }
