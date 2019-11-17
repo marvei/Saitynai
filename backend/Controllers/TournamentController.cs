@@ -4,99 +4,123 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using backend.Models.Tournament;
-using backend.Models.Match;
+using backend.Models;
 
 namespace backend.Controllers
 {
     public class TournamentController : ApiController
     {
+
+        //get tournament list (ALL)
         [HttpGet]
-        [Route("api/tournament")]
-        public IHttpActionResult getTournaments()
+        [Route("api/tournament/")]
+        public IHttpActionResult GetTournaments()
         {
-            List<Tournament> availableTournaments = TournamentRequest.getInstance().getAllTournaments();
-            if (availableTournaments.Any())
+            List<Tournament> allTournaments = DatabaseAccessModel.GetTournamentListFromSql().ToList();
+            if (allTournaments.Any())
             {
-                return Ok(availableTournaments);
+                return Content(HttpStatusCode.OK, allTournaments);
             }
-            return NotFound();
+            return Content(HttpStatusCode.NotFound, new Error
+            {
+                Message = "Tournaments not found.",
+                Code = HttpStatusCode.NotFound.ToString()
+            });
         }
 
+        //get tournament by ID
         [HttpGet]
-        [Route("api/tournament/{tournamentId}")]
-        public IHttpActionResult getTournamentById(string tournamentId)
+        [Route("api/tournament/{id}")]
+        public IHttpActionResult GetTournamentById(int id)
         {
-            Tournament currentTournament = TournamentRequest.getInstance().getTournamentById(tournamentId);
-            if (currentTournament != null)
+            Tournament tournament = DatabaseAccessModel.GetTournamentListFromSqlbyId(id);
+            if (tournament.id != null)
             {
-                return Ok(currentTournament);
+                return Ok(tournament);
             }
-            return NotFound();
+            return Content(HttpStatusCode.NotFound, new Error
+            {
+                Message = "Tournament with id " + id + " not found.",
+                Code = HttpStatusCode.NotFound.ToString()
+            });
         }
 
+        //Add tournament to database
         [HttpPost]
-        [Route("api/tournament")]
-        public IHttpActionResult registerTournament(Tournament tournament)
+        [Route("api/tournament/")]
+        public IHttpActionResult AddTournament(Tournament tournament)
         {
-            if (TournamentRequest.getInstance().Add(tournament))
+            if (!ModelState.IsValid)
             {
-                return Ok();
+                return Content(HttpStatusCode.BadRequest, new Error
+                {
+                    Message = "Invalid data.",
+                    Code = HttpStatusCode.BadRequest.ToString()
+                });
             }
-            return BadRequest();
-
-            //TournamentReply tournamentRep = new TournamentReply();
-            //TournamentRequest.getInstance().Add(tournament);
-            //tournamentRep.Name = tournament.Name;
-            //tournamentRep.TournamentId = tournament.TournamentId;
-            //tournamentRep.TournamentStatus = "Successful";
-
-            //return tournamentRep;
+            if (DatabaseAccessModel.AddTournamentToDatabase(tournament))
+            {
+                return Ok(tournament);
+            }
+            return Content(HttpStatusCode.BadRequest, new Error
+            {
+                Message = "Invalid tournament data/could not insert.",
+                Code = HttpStatusCode.BadRequest.ToString()
+            });
         }
 
+        //update tournament
         [HttpPut]
-        [Route("api/tournament")]
-        public IHttpActionResult putTournament(Tournament tournament)
+        [Route("api/tournament/{id}")]
+        public IHttpActionResult putTournament(Tournament tournament, int id)
         {
-            if (TournamentRequest.getInstance().UpdateTournament(tournament))
+            if (DatabaseAccessModel.CheckTournamentExists(id))
             {
-                return Ok();
+                if (DatabaseAccessModel.UpdateTournamentToDatabase(id, tournament))
+                {
+                    return Ok();
+                }
+                return Content(HttpStatusCode.BadRequest, new Error
+                {
+                    Message = "Invalid tournament data/could not update.",
+                    Code = HttpStatusCode.BadRequest.ToString()
+                });
             }
-            return BadRequest();
+            return Content(HttpStatusCode.NotFound, new Error
+            {
+                Message = "Tournament with id  " + id + " not found.",
+                Code = HttpStatusCode.NotFound.ToString()
+            });
         }
 
+        //delete tournament
         [HttpDelete]
         [Route("api/tournament/{tournamentId}")]
-        public IHttpActionResult deleteTournament(string tournamentId)
+        public IHttpActionResult DeleteTournament(int tournamentId)
         {
-            if (TournamentRequest.getInstance().getTournamentById(tournamentId) == null)
+            if (DatabaseAccessModel.CheckTournamentExists(tournamentId))
             {
-                return NotFound();
+                try
+                {
+                    if (DatabaseAccessModel.DeleteTournament(tournamentId))
+                    {
+                        return Ok();
+                    }
+                }
+                catch (MySql.Data.MySqlClient.MySqlException ex)
+                {
+                    return Content(HttpStatusCode.NotAcceptable, ex.Message);
+                }
             }
-            if (TournamentRequest.getInstance().Remove(tournamentId))
-            {
-                return Ok();
-            }
-            return BadRequest();
+            return Ok();
         }
 
-        [HttpPut]
-        [Route("api/tournament/{tournamentId}/{matchId}")]
-        public IHttpActionResult addMatchToTournament(string tournamentId, string matchId)
-        {
-            if (MatchRequest.getInstance().getMatchById(matchId) == null)
-            {
-                return NotFound();
-            }
-            if (TournamentRequest.getInstance().getTournamentById(tournamentId) == null)
-            {
-                return NotFound();
-            }
-            if (TournamentRequest.getInstance().addMatch(matchId, tournamentId))
-            {
-                return Ok();
-            }
-            return BadRequest();
-        }
+        //[HttpPut]
+        //[Route("api/tournament")]
+        //public IHttpActionResult addMatchToTournament(string tournamentId, string matchId)
+        //{
+        //    //change match by id fk_tournamentid to tournamentId
+        //    return Ok();
+        //}
     }
 }

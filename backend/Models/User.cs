@@ -7,37 +7,43 @@ namespace backend.Models
 {
     public class User
     {
-        String name;
+        //String name;
 
-        public String Name
-        {
-            get { return name; }
-            set { name = value; }
-        }
+        //public String Name
+        //{
+        //    get { return name; }
+        //    set { name = value; }
+        //}
 
-        int age;
+        //int age;
 
-        public int Age
-        {
-            get { return age; }
-            set { age = value; }
-        }
+        //public int Age
+        //{
+        //    get { return age; }
+        //    set { age = value; }
+        //}
 
-        string password;
+        //string password;
 
-        public string Password
-        {
-            get { return password; }
-            set { password = value; }
-        }
+        //public string Password
+        //{
+        //    get { return password; }
+        //    set { password = value; }
+        //}
 
-        string userId;
+        //string userId;
 
-        public string UserId
-        {
-            get { return userId; }
-            set { userId = value; }
-        }
+        //public string UserId
+        //{
+        //    get { return userId; }
+        //    set { userId = value; }
+        //}
+
+        public int? id { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public int Age { get; set; }
+        public int? fk_TeamId { get; set; }
 
     }
 }

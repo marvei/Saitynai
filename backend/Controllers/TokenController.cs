@@ -29,25 +29,24 @@ namespace backend.Controllers
         {
             var loginRequest = new User
             {
-                Name = user.Name,
+                Username = user.Username,
                 Password = user.Password
             };
 
-            User databaseUser = UserRequest.getInstance().getUserByName(loginRequest.Name);
+            User databaseUser;
 
-            if (databaseUser == null)
+            if (user != null)
             {
-                return NotFound();
+                databaseUser = DatabaseAccessModel.GetUserByUsername(loginRequest.Username);
+
+                var isUsernamePasswordValid = SecurePasswordHasher.Verify(loginRequest.Password, databaseUser.Password);
+
+                if (isUsernamePasswordValid)
+                {
+                    var token = CreateToken(loginRequest.Username);
+                    return Ok(token);
+                }
             }
-
-            var isUsernamePasswordValid = SecurePasswordHasher.Verify(loginRequest.Password, databaseUser.Password);
-
-            if (isUsernamePasswordValid)
-            {
-                var token = CreateToken(loginRequest.Name);
-                return Ok(token);
-            }
-
             return Unauthorized();
         }
 
