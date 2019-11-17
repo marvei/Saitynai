@@ -108,9 +108,17 @@ namespace backend.Controllers
         [Route("api/user/{id}")]
         public IHttpActionResult PutUser(int id, User user)
         {
+            if (!ModelState.IsValid)
+            {
+                return Content(HttpStatusCode.BadRequest, new Error
+                {
+                    Message = "Invalid data.",
+                    Code = HttpStatusCode.BadRequest.ToString()
+                });
+            }
             if (DatabaseAccessModel.CheckUserExists(id))
             {
-                user.Password = SecurePasswordHasher.Hash(user.Password);
+                //user.Password = SecurePasswordHasher.Hash(user.Password);
                 if (DatabaseAccessModel.UpdateUserToDatabase(user, id))
                 {
                     return Ok();

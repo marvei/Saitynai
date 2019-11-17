@@ -130,9 +130,8 @@ namespace backend.Models
             {
                 conn.Open();
                 MySqlCommand cmd = conn.CreateCommand();
-                cmd.CommandText = "Update User Set Username=?Username,password=?password,age=?age where userId='" + userid + "'";
+                cmd.CommandText = "Update User Set Username=?Username,age=?age where userId='" + userid + "'";
                 cmd.Parameters.AddWithValue("Username", user.Username);
-                cmd.Parameters.AddWithValue("password", user.Password);
                 cmd.Parameters.AddWithValue("age", user.Age);
                 int rowCount = cmd.ExecuteNonQuery();
                 if (rowCount >= 1)
@@ -726,7 +725,7 @@ namespace backend.Models
                 conn.Open();
                 MySqlDataReader reader;
                 MySqlCommand cmd = conn.CreateCommand();
-                cmd.CommandText = "select count(*) from matches where matchId=?matchId and fk_tournamentId=?tournamentId";
+                cmd.CommandText = "select * from matches where matchId=?matchId and fk_tournamentId=?tournamentId";
                 cmd.Parameters.AddWithValue("matchId", matchId);
                 cmd.Parameters.AddWithValue("tournamentId", tournamentId);
                 reader = cmd.ExecuteReader();
@@ -752,7 +751,7 @@ namespace backend.Models
                 conn.Open();
                 MySqlDataReader reader;
                 MySqlCommand cmd = conn.CreateCommand();
-                cmd.CommandText = "select count(*) from team where teamId=?teamId and fk_matchId=?fk_matchId";
+                cmd.CommandText = "select * from team where teamId=?teamId and fk_matchId=?fk_matchId";
                 cmd.Parameters.AddWithValue("teamId", teamId);
                 cmd.Parameters.AddWithValue("fk_matchId", matchId);
                 reader = cmd.ExecuteReader();
