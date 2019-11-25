@@ -13,6 +13,7 @@ namespace backend.Controllers
 {
     public class TokenController : ApiController
     {
+        //prideti vartotojo teises prisijungimo metu, kitu atveju leisti tik getint
         [HttpGet]
         [Authorize]
         [Route("api/jwt/ok")]
@@ -43,24 +44,32 @@ namespace backend.Controllers
 
                 if (isUsernamePasswordValid)
                 {
-                    var token = CreateToken(loginRequest.Username);
+                    //loginRequest.id = databaseUser.id;
+                    loginRequest.Role = databaseUser.Role;
+                    //var token = CreateToken(loginRequest.Username);
+                    var token = CreateToken(loginRequest.Role, loginRequest.Username);
                     return Ok(token);
                 }
             }
             return Unauthorized();
         }
 
-        private string CreateToken(string name)
+        private string CreateToken(string role, string name)
         {
             DateTime issuedAt = DateTime.UtcNow;
             DateTime expires = DateTime.UtcNow.AddDays(7);
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
+
+            //new Claim(ClaimTypes.Name, name)
             var claimsIdentity = new ClaimsIdentity(new[]
-            { 
+            {                 
+                new Claim(ClaimTypes.Role, role),
                 new Claim(ClaimTypes.Name, name)
             });
+
+            //claimsIdentity.AddClaim(new Claim(ClaimTypes.Sid, id));
 
             const string secretKey = "s1u3p5e8r6s8e5c9r5e6t";
 

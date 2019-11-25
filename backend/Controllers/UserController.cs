@@ -5,12 +5,15 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using backend.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
     public class UserController : ApiController
     {
         //get all users
+        [AllowAnonymous]
         [HttpGet]
         [Route("api/user/")]
         public IHttpActionResult GetUsers()
@@ -28,6 +31,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize]
         [HttpGet]
         [Route("api/user/{id}")]
         public IHttpActionResult GetUserById(int id)
@@ -44,30 +48,7 @@ namespace backend.Controllers
             });
         }
 
-        //[Route("CreateUser")]
-        //[HttpPost]
-        //[Route("api/user")]
-        //public IHttpActionResult registerUser(User user)
-        //{
-
-        //    if (UserRequest.getInstance().Add(user))
-        //    {
-        //        return Ok();
-        //    }
-        //    return BadRequest();
-
-        //    //Console.WriteLine("In registerUser");
-        //    //UserReply userRep = new UserReply();
-        //    //UserRequest.getInstance().Add(user);
-        //    //userRep.Name = user.Name;
-        //    //userRep.Age = user.Age;
-        //    //userRep.UserId = user.UserId;
-        //    //userRep.UserStatus = "Successful";
-
-        //    //return teamRep;
-
-        //}
-
+        [AllowAnonymous]
         [HttpPost]
         [Route("api/user/")]
         public IHttpActionResult RegisterUser(User user)
@@ -92,22 +73,20 @@ namespace backend.Controllers
             });
         }
 
-        //[Route("UpdateUser")]
-        //[HttpPut]
-        //[Route("api/user/")]
-        //public IHttpActionResult putUser(User user)
-        //{
-        //    if (UserRequest.getInstance().UpdateUser(user))
-        //    {
-        //        return Ok();
-        //    }
-        //    return BadRequest();
-        //}
-
+        [Authorize]
         [HttpPut]
         [Route("api/user/{id}")]
         public IHttpActionResult PutUser(int id, User user)
         {
+            //var a = Thread.CurrentPrincipal.Identity.Name;
+            if (DatabaseAccessModel.GetUserByUsername(Thread.CurrentPrincipal.Identity.Name).id != id && !Thread.CurrentPrincipal.IsInRole(UserRoles.Admin))
+            {
+                return Content(HttpStatusCode.Forbidden, new Error
+                {
+                    Message = "Your id doesn't match with this user.",
+                    Code = HttpStatusCode.Forbidden.ToString()
+                });
+            }
             if (!ModelState.IsValid)
             {
                 return Content(HttpStatusCode.BadRequest, new Error
@@ -136,27 +115,20 @@ namespace backend.Controllers
             });
         }
 
-
-        //[Route("RemoveUser/{userId}")]
-        //[HttpDelete]
-        //[Route("api/user/{userId}")]
-        //public IHttpActionResult deleteUser(string userId)
-        //{
-        //    if (UserRequest.getInstance().getUserById(userId) == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    if (UserRequest.getInstance().Remove(userId))
-        //    {
-        //        return Ok();
-        //    }
-        //    return BadRequest();
-        //}
-
+        //[Authorize(Roles = UserRoles.Admin + ";" + UserRoles.Registered)]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Registered)]
         [HttpDelete]
         [Route("api/user/{id}")]
         public IHttpActionResult DeleteUser(int id)
         {
+            if (DatabaseAccessModel.GetUserByUsername(Thread.CurrentPrincipal.Identity.Name).id != id && !Thread.CurrentPrincipal.IsInRole(UserRoles.Admin))
+            {
+                return Content(HttpStatusCode.Forbidden, new Error
+                {
+                    Message = "Your id doesn't match with this user.",
+                    Code = HttpStatusCode.Forbidden.ToString()
+                });
+            }
             if (DatabaseAccessModel.CheckUserExists(id))
             {
                 try 
@@ -175,6 +147,55 @@ namespace backend.Controllers
             {
                 Message = "User with id " + id + " not found.",
                 Code = HttpStatusCode.NotFound.ToString()
+            });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("api/user/{userId}/team")]
+        public IHttpActionResult UserTeamCreate(int userId, Team team)
+        {
+            if (DatabaseAccessModel.CheckUserExists(userId))
+            {
+                if (DatabaseAccessModel.AddTeamToDatabaseByUser(team, userId))
+                {
+                    return Ok(team);
+                }
+                return Content(HttpStatusCode.BadRequest, new Error
+                {
+                    Code = HttpStatusCode.BadRequest.ToString(),
+                    Message = "Invalid team data/could not insert."
+                });
+            }
+            return Content(HttpStatusCode.NotFound, new Error
+            {
+                Code = HttpStatusCode.NotFound.ToString(),
+                Message = "User with id " + userId + " not found."
+            });
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("api/user/{userId}/team")]
+        public IHttpActionResult getUserTeam(int userId)
+        {
+            if (DatabaseAccessModel.CheckUserExists(userId))
+            {
+                Team userTeam = DatabaseAccessModel.GetTeamByOwner(userId);
+                if (userTeam.id != null)
+                {
+                    return Ok(userTeam);
+                }
+                return Content(HttpStatusCode.NotFound, new Error
+                {
+                    Code = HttpStatusCode.NotFound.ToString(),
+                    Message = "No team ownership of user with id " + userId + " found."
+                });
+            }
+            return Content(HttpStatusCode.NotFound, new Error
+            {
+                Code = HttpStatusCode.NotFound.ToString(),
+                Message = "User with id " + userId + " not found."
             });
         }
     }

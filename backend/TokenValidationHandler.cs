@@ -13,6 +13,7 @@ namespace backend
 {
     public class TokenValidationHandler : DelegatingHandler
     {
+        //reikia useriui padaryt kad adminas pagal tokena gali beleka, registruotas gali postint kaka, neregistruotas tik getint
         private static bool TryRetrieveToken(HttpRequestMessage request, out string token)
         {
             token = null;
@@ -41,7 +42,7 @@ namespace backend
 
             try
             {
-                const string secretKey = "your secret key goes here";
+                const string secretKey = "s1u3p5e8r6s8e5c9r5e6t";
                 var securityKey = new SymmetricSecurityKey(System.Text.Encoding.Default.GetBytes(secretKey));
 
 
@@ -61,6 +62,7 @@ namespace backend
                 //extract and assign the user of the jwt
                 Thread.CurrentPrincipal = handler.ValidateToken(token, validationParameters, out _);
                 HttpContext.Current.User = handler.ValidateToken(token, validationParameters, out _);
+
 
                 return base.SendAsync(request, cancellationToken);
             }

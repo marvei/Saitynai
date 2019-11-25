@@ -7,7 +7,7 @@ using System.Web.Http;
 using backend.Models;
 
 namespace backend.Controllers
-{
+{    
     public class MatchController : ApiController
     {
         //[HttpGet]
@@ -21,7 +21,7 @@ namespace backend.Controllers
         //    }
         //    return NotFound();
         //}
-
+        [Authorize]
         [HttpGet]
         [Route("api/tournament/{tournamentId:int}/match/")]
         public IHttpActionResult GetMatchesByTournamentId(int tournamentId)
@@ -58,6 +58,7 @@ namespace backend.Controllers
         //    return NotFound();
         //}
 
+        [Authorize]
         [HttpGet]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}")]
         public IHttpActionResult GetMatchById(int tournamentId, int matchId)
@@ -91,6 +92,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [Route("api/tournament/{tournamentId:int}/match/")]
         public IHttpActionResult RegisterUser(int tournamentId, Match match)
@@ -123,6 +125,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}")]
         public IHttpActionResult PutMatch(int tournamentId, int matchId, Match match)
@@ -166,6 +169,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}")]
         public IHttpActionResult DeleteUser(int tournamentId, int matchId)

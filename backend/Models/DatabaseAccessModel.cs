@@ -31,6 +31,8 @@ namespace backend.Models
                     {
                         user.Username = reader["username"].ToString();
                         user.Password = reader["password"].ToString();
+                        user.Role = reader["role"].ToString();
+                        user.id = int.Parse(reader["userId"].ToString());
                     }
                     else
                     {
@@ -48,10 +50,18 @@ namespace backend.Models
             {
                 conn.Open();
                 MySqlCommand cmd = conn.CreateCommand();
-                cmd.CommandText = "Insert into User(Username,password,age) VALUES(?username,?password,?age)";
+                cmd.CommandText = "Insert into User(Username,password,age,role) VALUES(?username,?password,?age,?role)";
                 cmd.Parameters.AddWithValue("username", user.Username);
                 cmd.Parameters.AddWithValue("password", user.Password);
                 cmd.Parameters.AddWithValue("age", user.Age);
+                if (user.Role != null)
+                {
+                    cmd.Parameters.AddWithValue("role", user.Role);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("role", UserRoles.Registered);
+                }
                 int rowCount = cmd.ExecuteNonQuery();
                 if (rowCount >= 1)
                 {
@@ -83,7 +93,8 @@ namespace backend.Models
                         id = int.Parse(reader["userid"].ToString()),
                         Username = reader["username"].ToString(),
                         Password = "",
-                        Age = int.Parse(reader["Age"].ToString())
+                        Age = int.Parse(reader["Age"].ToString()),
+                        Role = reader["role"].ToString()
                     };
                 }
             }
@@ -107,6 +118,7 @@ namespace backend.Models
                         user.Username = reader["username"].ToString();
                         user.Password = "";
                         user.Age = int.Parse(reader["age"].ToString());
+                        user.Role = reader["role"].ToString();
                         try
                         {
                             user.fk_TeamId = int.Parse(reader["fk_teamId"].ToString());
@@ -292,6 +304,7 @@ namespace backend.Models
             }
             return team;
         }
+
         public static bool AddTeamToDatabase(Team team)
         {
             using (var conn = new MySqlConnection(GetConnectionString()))
@@ -311,6 +324,109 @@ namespace backend.Models
                     conn.Close();
                     return false;
                 }
+            }
+        }
+
+        public static bool AddTeamToDatabaseByUser(Team team, int userId)
+        {
+            using (var conn = new MySqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                MySqlCommand cmd = conn.CreateCommand();
+                cmd.CommandText = "Insert into Team(Name,ownerId) VALUES(?name,?ownerId); select @temp := teamId from team where ownerId=?ownerId; Update user set fk_teamId=@temp where userId=?ownerId";
+                cmd.Parameters.AddWithValue("name", team.Name);
+                cmd.Parameters.AddWithValue("ownerId", userId);
+                int rowCount = cmd.ExecuteNonQuery();
+                if (rowCount >= 1)
+                {
+                    conn.Close();
+                    return true;
+                }
+                else
+                {
+                    conn.Close();
+                    return false;
+                }
+            }
+        }
+
+        public static Team GetTeamByOwner(int id)
+        {
+            Team team = new Team();
+            using (var conn = new MySqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                MySqlDataReader reader;
+                MySqlCommand cmd = conn.CreateCommand();
+                cmd.CommandText = "Select * from Team where ownerId = '" + id + "'";
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (!reader["teamId"].Equals(null))
+                    {
+                        team.id = int.Parse(reader["teamId"].ToString());
+                        team.Name = reader["name"].ToString();
+                        team.ownerId = int.Parse(reader["ownerId"].ToString());
+                    }
+                    else
+                    {
+                        team = null;
+                    }
+                }
+                conn.Close();
+            }
+            return team;
+        }
+
+        public static Team GetTeamById(int id)
+        {
+            Team team = new Team();
+            using (var conn = new MySqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                MySqlDataReader reader;
+                MySqlCommand cmd = conn.CreateCommand();
+                cmd.CommandText = "Select * from Team where teamId = '" + id + "'";
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (!reader["teamId"].Equals(null))
+                    {
+                        team.id = int.Parse(reader["teamId"].ToString());
+                        team.Name = reader["name"].ToString();
+                        team.ownerId = int.Parse(reader["ownerId"].ToString());
+                    }
+                    else
+                    {
+                        team = null;
+                    }
+                }
+                conn.Close();
+            }
+            return team;
+        }
+
+        public static bool AddUserToTeam(int userId, int teamId)
+        {
+            using (var conn = new MySqlConnection(GetConnectionString()))
+            {
+                conn.Open();
+                MySqlCommand cmd = conn.CreateCommand();
+                cmd.CommandText = "Update User Set fk_teamId=?teamId where userId=?userId;";
+                cmd.Parameters.AddWithValue("teamId", teamId);
+                cmd.Parameters.AddWithValue("userId", userId);
+                int rowCount = cmd.ExecuteNonQuery();
+                if (rowCount >= 1)
+                {
+                    conn.Close();
+                    return true;
+                }
+                else
+                {
+                    conn.Close();
+                    return false;
+                }
+
             }
         }
 

@@ -4,24 +4,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Threading;
 using backend.Models;
 
 namespace backend.Controllers
 {
     public class TeamController : ApiController
     {
-        //[HttpGet]
-        //[Route("api/team")]
-        //public IHttpActionResult getUsers()
-        //{
-        //    List<Team> availableTeams = TeamRequest.getInstance().getAllTeams();
-        //    if (availableTeams.Any())
-        //    {
-        //        return Ok(availableTeams);
-        //    }
-        //    return NotFound();
-        //}
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}/team/")]
         public IHttpActionResult GetTeams(int tournamentId, int matchId)
@@ -54,18 +44,7 @@ namespace backend.Controllers
             });
         }
 
-        //[HttpGet]
-        //[Route("api/team/{teamId}")]
-        //public IHttpActionResult getUserById(string teamId)
-        //{
-        //    Team currentTeam = TeamRequest.getInstance().getTeamById(teamId);
-        //    if (currentTeam != null)
-        //    {
-        //        return Ok(currentTeam);
-        //    }
-        //    return NotFound();
-        //}
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}/team/{teamId:int}")]
         public IHttpActionResult GetTeamById(int tournamentId, int matchId, int teamId)
@@ -106,10 +85,10 @@ namespace backend.Controllers
             });
         }
 
-        //public TeamReply registerTeam(Team team)
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}/team/")]
-        public IHttpActionResult AddTeam( int tournamentId, int matchId, Team team)
+        public IHttpActionResult AddTeam(int tournamentId, int matchId, Team team)
         {
             if (!ModelState.IsValid)
             {
@@ -146,6 +125,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}/team/{teamId:int}")]
         public IHttpActionResult PutUser(int tournamentId, int matchId, int teamId, Team team)
@@ -193,6 +173,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete]
         [Route("api/tournament/{tournamentId:int}/match/{matchId:int}/team/{teamId:int}")]
         public IHttpActionResult DeleteUser(int tournamentId, int matchId, int teamId)
@@ -234,23 +215,45 @@ namespace backend.Controllers
             });
         }
 
-        //[HttpPut]
-        //[Route("api/team/{teamId}/{userId}")]
-        //public IHttpActionResult addUserToTeam(string teamId, string userId)
-        //{
-        //    if (UserRequest.getInstance().getUserById(userId) == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    if (TeamRequest.getInstance().getTeamById(teamId) == null)
-        //    {               
-        //        return NotFound();
-        //    }
-        //    if (TeamRequest.getInstance().addUser(userId, teamId))
-        //    {
-        //        return Ok();
-        //    }
-        //    return BadRequest();
-        //}
+        [Authorize]
+        [HttpPut]
+        [Route("api/team/{teamId}/user/{userId}")]
+        public IHttpActionResult AddUserToTeam(int userId, int teamId)
+        {
+            //teamid owner - principal user id
+            if (DatabaseAccessModel.GetUserByUsername(Thread.CurrentPrincipal.Identity.Name).id != (DatabaseAccessModel.GetTeamById(teamId)).ownerId && !Thread.CurrentPrincipal.IsInRole(UserRoles.Admin))
+            {
+                return Content(HttpStatusCode.Forbidden, new Error
+                {
+                    Message = "Your id doesn't match with this user.",
+                    Code = HttpStatusCode.Forbidden.ToString()
+                });
+            }
+            if (DatabaseAccessModel.CheckTeamExists(teamId))
+            {
+                if (DatabaseAccessModel.CheckUserExists(userId))
+                {
+                    if (DatabaseAccessModel.AddUserToTeam(userId, teamId))
+                    {
+                        return Ok();
+                    }
+                    return Content(HttpStatusCode.BadRequest, new Error
+                    {
+                        Code = HttpStatusCode.BadRequest.ToString(),
+                        Message = "Bad data/could not update."
+                    });
+                }
+                return Content(HttpStatusCode.NotFound, new Error
+                {
+                    Code = HttpStatusCode.NotFound.ToString(),
+                    Message = "User with id " + userId + " not found."
+                });
+            }
+            return Content(HttpStatusCode.NotFound, new Error
+            {
+                Code = HttpStatusCode.NotFound.ToString(),
+                Message = "Team with id " + teamId + " not found."
+            });
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace backend.Controllers
     {
 
         //get tournament list (ALL)
+        [Authorize]
         [HttpGet]
         [Route("api/tournament/")]
         public IHttpActionResult GetTournaments()
@@ -28,6 +29,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize]
         //get tournament by ID
         [HttpGet]
         [Route("api/tournament/{id}")]
@@ -45,6 +47,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         //Add tournament to database
         [HttpPost]
         [Route("api/tournament/")]
@@ -69,6 +72,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         //update tournament
         [HttpPut]
         [Route("api/tournament/{id}")]
@@ -93,6 +97,7 @@ namespace backend.Controllers
             });
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         //delete tournament
         [HttpDelete]
         [Route("api/tournament/{tournamentId}")]
